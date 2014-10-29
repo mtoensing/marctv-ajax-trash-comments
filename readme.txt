@@ -1,13 +1,13 @@
 === MarcTV Easy Delete Comments  ===
 Contributors: MarcDK
-Tags: MarcTV, comments
+Tags: MarcTV, comments, ajax
 Requires at least: 3.0
 Tested up to: 4.0
 Stable tag: 1.0
 
 == Description ==
 
-Removes comments easier.
+Remove comments faster directly in the frontend. Works with and without ajax. 
 
 == Installation ==
 
