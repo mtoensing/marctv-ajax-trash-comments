@@ -1,4 +1,4 @@
-=== MarcTV Easy Delete Comments  ===
+=== MarcTV AJAX Trash Comments  ===
 Contributors: MarcDK
 Tags: MarcTV, comments, ajax
 Requires at least: 3.0
