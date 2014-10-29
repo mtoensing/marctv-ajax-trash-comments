@@ -23,7 +23,7 @@ function get_trash_comment_link($comment_text) {
     $nonce = wp_create_nonce("delete-comment_$comment_id");
     $del_nonce = esc_html('_wpnonce=' . $nonce);
     $trash_url = esc_url("/wp-admin/comment.php?action=trashcomment&c=$comment_id&$del_nonce");
-    $trash_link = "<a data-nonce='$nonce' data-cid='$comment_id' class='marctv-ajax-trash' href='$trash_url' title='" . esc_attr__(__('Move this comment to the trash', 'marctv-ajax-trash-comments')) . "'>" . __('trash', 'marctv-ajax-trash-comments') . '</a>';
+    $trash_link = "<small><a data-nonce='$nonce' data-cid='$comment_id' class='marctv-trash' href='$trash_url' title='" . esc_attr__(__('Move this comment to the trash', 'marctv-ajax-trash-comments')) . "'>" . __('trash', 'marctv-ajax-trash-comments') . '</a></small>';
 
     return $comment_text . $trash_link;
   }

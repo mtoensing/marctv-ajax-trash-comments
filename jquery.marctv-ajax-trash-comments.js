@@ -1,5 +1,5 @@
 jQuery(function($) {
-  $('a.marctv-ajax-trash').click(function() {
+  $('a.marctv-trash').click(function() {
     
     var cid = $(this).data('cid');
     var nonce = $(this).data('nonce');
@@ -21,7 +21,7 @@ jQuery(function($) {
       if (data > -1) {
         $('#li-comment-' + cid).fadeOut('slow');
       } else {
-         $('a.marctv-ajax-trash','#li-comment-' + cid).after(' <em class="marctv-error" data-error="' + data + '">error</em>');
+         $('a.marctv-trash','#li-comment-' + cid).after(' <em class="marctv-error" data-error="' + data + '">error</em>');
       }
     }
 
