@@ -7,7 +7,7 @@ Stable tag: 1.0
 
 == Description ==
 
-Remove comments faster directly in the frontend. Works with and without ajax. 
+Trash your comments in the frontend with one click.
 
 == Installation ==
 

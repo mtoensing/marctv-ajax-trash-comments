@@ -3,8 +3,8 @@
 /*
   Plugin Name: MarcTV ajax trash comments
   Plugin URI: http://marctv.de/blog/marctv-wordpress-plugins/
-  Description: Remove comments faster directly in the frontend. 
-  Version: 0.1
+  Description: Trash your comments in the frontend with one click.
+  Version: 0.3
   Author: MarcDK
   Author URI: http://www.marctv.de
   License: GPL v2 - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
