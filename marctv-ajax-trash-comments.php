@@ -4,7 +4,7 @@
   Plugin Name: MarcTV ajax trash comments
   Plugin URI: http://marctv.de/blog/marctv-wordpress-plugins/
   Description: Trash your comments in the frontend with one click.
-  Version: 0.3
+  Version: 1.0.1
   Author: MarcDK
   Author URI: http://www.marctv.de
   License: GPL v2 - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
@@ -18,7 +18,7 @@
  */
 
 function get_trash_comment_link( $comment_text ) {
-	if ( current_user_can( 'moderate_comments' ) ) {
+	if ( current_user_can( 'moderate_comments' ) && is_single() ) {
 		$comment_id = get_comment_ID();
 		$nonce      = wp_create_nonce("delete-comment_$comment_id");
 		$del_nonce  = esc_html( '_wpnonce=' . $nonce );

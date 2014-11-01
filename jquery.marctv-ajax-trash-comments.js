@@ -22,7 +22,6 @@ jQuery(function ($) {
             dataType: 'html'
         });
 
-
         return false;
     });
 });
