@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: MarcTV Moderate Comments\n"
-"POT-Creation-Date: 2014-11-01 23:55-0800\n"
-"PO-Revision-Date: 2014-11-01 23:56-0800\n"
+"POT-Creation-Date: 2014-11-02 13:53-0800\n"
+"PO-Revision-Date: 2014-11-02 13:53-0800\n"
 "Last-Translator: Marc Tönsing <marc@marctv.de>\n"
 "Language-Team: Marc Tönsing <marc@marctv.de>\n"
 "Language: de_DE\n"
@@ -18,9 +18,37 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: marctv-moderate.php:33 marctv-moderate.php:64
+#: admin/marctv-moderate-admin.php:3
+msgid "Moderate Comments Settings"
+msgstr "Moderationseinstellungen"
+
+#: admin/marctv-moderate-admin.php:9
+msgid "Moderation text"
+msgstr "Moderationstext"
+
+#: admin/marctv-moderate-admin.php:11
+msgid ""
+"This text will be used to replace the comment text if you click \"replace "
+"comment text\"."
+msgstr ""
+"Dieser Text ersetzt den Kommentartext wenn du auf \"Ersetze Kommentartext\" "
+"klickst."
+
+#: admin/marctv-moderate-admin.php:14
+msgid "Undo warning accepted?"
+msgstr "Warnung gelesen?"
+
+#: admin/marctv-moderate-admin.php:16
+msgid ""
+"Indicates that you have read and accepted the warning that replacing the "
+"comment text with the moderation text above can not be undone."
+msgstr ""
+"Du die Warnung gesehen und akzeptiert, dass das Ersetzen des Kommentartextes "
+"mit dem Moderationstext nicht rückgängig gemacht werden kann."
+
+#: marctv-moderate.php:33 marctv-moderate.php:66
 msgid "trash"
-msgstr "Wegwerfen"
+msgstr "Papierkorb"
 
 #: marctv-moderate.php:34
 msgid "untrash"
@@ -38,7 +66,7 @@ msgstr "wird wiederhergestellt"
 msgid "error"
 msgstr "Fehler"
 
-#: marctv-moderate.php:38 marctv-moderate.php:67
+#: marctv-moderate.php:38 marctv-moderate.php:69
 msgid "replace comment text"
 msgstr "Ersetze Kommentarinhalt"
 
@@ -52,17 +80,33 @@ msgstr "Kommentartext wurde ersetzt."
 
 #: marctv-moderate.php:41
 msgid "comment text already replaced"
-msgstr "Kommentarinhalt wurde bereits ersetzt"
+msgstr "Kommentarinhalt wurde bereits ersetzt."
 
-#: marctv-moderate.php:63
+#: marctv-moderate.php:42
+msgid "This action can not be undone! Save and proceed?"
+msgstr ""
+"Dieser Vorgang kann nicht rückgängig gemacht werden! Speichern und "
+"fortfahren?"
+
+#: marctv-moderate.php:65
 msgid "Move this comment to the trash"
 msgstr "Diesen Kommentar in den Papierkorb legen"
 
-#: marctv-moderate.php:66
-msgid "Replace comment text with moderation text. THIS ACTION CANNOT BE UNDONE"
-msgstr ""
-"Kommentarinhalt mit Moderationshinweis ersetzen. DIESER VORGANG KANN NICHT "
-"RÜCKGÄNGIG GEMACHT WERDEN!"
+#: marctv-moderate.php:68
+msgid "Replace comment text with customized moderation text."
+msgstr "Kommentarinhalt mit angepasstem Moderationshinweis ersetzen."
+
+#: marctv-moderate.php:71
+msgid "MarcTV moderate settings page"
+msgstr "MarcTV Moderate Einstellungen"
+
+#: marctv-moderate.php:72
+msgid "Moderation settings"
+msgstr "Moderationseinstellungen"
+
+#: marctv-moderate.php:157
+msgid "[incorrect topic]"
+msgstr "[Thema verfehlt]"
 
 #~ msgid "restore comment text"
 #~ msgstr "Kommentarinhalt wiederherstellen"

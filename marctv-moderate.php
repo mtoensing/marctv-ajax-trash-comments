@@ -39,7 +39,8 @@ function add_marctv_ajax_comment_scripts() {
 		'replacing_string' => __( 'replacing comment text', 'marctv-moderate' ),
 		'replaced_string' => __( 'replaced comment text', 'marctv-moderate' ),
 		'already_replaced_string' =>  __( 'comment text already replaced', 'marctv-moderate' ),
-		'confirm_string' =>  __( 'This action can not be undone! Save and proceed?', 'marctv-moderate' )
+		'confirm_string' =>  __( 'This action can not be undone! Save and proceed?', 'marctv-moderate' ),
+		'warned' => get_option('marctv-moderate-warned')
 	);
 
 	wp_localize_script( 'jquery.marctv-moderate', 'marctvmoderate', $params );
@@ -64,12 +65,17 @@ function get_marctv_ajax_links( $comment_text ) {
 		title='" . esc_attr__( __( 'Move this comment to the trash', 'marctv-moderate' ) ) . "'>"
 		         . __( 'trash', 'marctv-moderate' ) . '</a> | ';
 		$link .= "<a data-nonce='$nonce' data-cid='$comment_id' class='marctv-replace-btn marctv-replace' href='#'
-		title='" . esc_attr__( __( 'Replace comment text with moderation text. THIS ACTION CANNOT BE UNDONE', 'marctv-moderate' ) )
-		         . "'>" . __( 'replace comment text', 'marctv-moderate' ) . '</a>';
+		title='" . esc_attr__( __( 'Replace comment text with customized moderation text.', 'marctv-moderate' ) )
+		         . "'>" . __( 'replace comment text', 'marctv-moderate' ) . '</a> | ';
+
+		$link .= "<a href='/wp-admin/options-general.php?page=marctv_moderate' title='" . esc_attr__( __( 'MarcTV moderate settings page', 'marctv-moderate' ) )
+		         . "'>" . __( 'Moderation settings', 'marctv-moderate' ) . '</a>';
+
 		$link .= "</small>";
 
 		return $comment_text . $link;
 	}
+	return $comment_text;
 }
 
 
@@ -103,15 +109,18 @@ function marctv_trash_comment() {
 function marctv_replace_comment() {
 	/* retrieve comment id from post ajax request and sanitize to number */
 	$comment_id = filter_input( INPUT_POST, 'cid', FILTER_SANITIZE_NUMBER_FLOAT );
+	$warned = filter_input( INPUT_POST, 'warned', FILTER_VALIDATE_BOOLEAN );
 
-	$original_comment = get_comment_text( $comment_id );
+	if($warned == true ) {
+		update_option('marctv-moderate-warned', 1);
+	}
 
 	/* check if the ajax referrer is the trash link */
 	check_ajax_referer("delete-comment_$comment_id");
 
 	$comment_arr = array();
 	$comment_arr['comment_ID'] = $comment_id;
-	$comment_arr['comment_content'] = get_option('moderation_text');
+	$comment_arr['comment_content'] = get_option('marctv-moderation-text');
 	if ( wp_update_comment( $comment_arr )) {
 		wp_die(1);
 	} else {
@@ -126,7 +135,8 @@ function marctv_moderate_plugin_menu(){
 
 function register_mysettings() {
 	//register our settings
-	register_setting( 'marctv-moderate-settings-group', 'moderation_text' );
+	register_setting( 'marctv-moderate-settings-group', 'marctv-moderation-text' );
+	register_setting( 'marctv-moderate-settings-group', 'marctv-moderate-warned' );
 }
 
 function marctv_moderate_load_textdomain() {
@@ -136,6 +146,18 @@ function marctv_moderate_load_textdomain() {
 function marctv_moderate_plugin_menu_options(){
 	include('admin/marctv-moderate-admin.php');
 }
+
+function  marctv_moderate_activate() {
+	if(empty(get_option('marctv-moderation-text'))) {
+
+		/* Loading the textdomain. I could not figure out to prevent this here. */
+		load_plugin_textdomain( 'marctv-moderate', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
+
+		/* If the moderation text is empty fill it with the default text */
+		update_option('marctv-moderation-text',__( '[incorrect topic]', 'marctv-moderate' ));
+	}
+}
+
 
 
 add_filter( 'comment_text', 'get_marctv_ajax_links', 99 );
@@ -151,3 +173,5 @@ add_action( "wp_ajax_marctv_replace_comment", "marctv_replace_comment" );
 add_action( 'plugins_loaded', 'marctv_moderate_load_textdomain' );
 
 add_action('admin_menu','marctv_moderate_plugin_menu');
+
+register_activation_hook( __FILE__, 'marctv_moderate_activate' );

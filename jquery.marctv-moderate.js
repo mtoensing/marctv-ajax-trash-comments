@@ -46,8 +46,11 @@ jQuery(function ($) {
     });
 
     $('.marctv-replace-btn').click(function () {
-        if (confirm(marctvmoderate.confirm_string)) {
 
+        var warned = false;
+
+        if (marctvmoderate.warned == 1 || confirm(marctvmoderate.confirm_string)) {
+            warned = true;
             var replacelink = $(this);
             var cid = $(this).data('cid');
             var nonce = $(this).data('nonce');
@@ -64,10 +67,11 @@ jQuery(function ($) {
                 data: {
                     action: 'marctv_replace_comment',
                     cid: cid,
+                    warned: warned,
                     _wpnonce: nonce
                 },
                 success: function (response_data) {
-                    if (response_data != 0) {
+                    if (response_data == 1) {
                         $(replacelink).addClass("marctv-done").removeClass('marctv-loading').text(marctvmoderate.replaced_string);
                     } else {
                         $(replacelink).addClass("marctv-error").removeClass('marctv-loading').text(marctvmoderate.already_replaced_string);
