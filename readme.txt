@@ -18,4 +18,8 @@ Trash your comments in the frontend with one click.
 
 = 1.0.1 =
 
-* Fixed: Trash button was visible in the backend. 
+* Fixed: Trash button was visible in the backend.
+
+= 1.0.2 =
+
+* Added ajax activity indicators.

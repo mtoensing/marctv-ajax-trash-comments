@@ -4,7 +4,7 @@
   Plugin Name: MarcTV ajax trash comments
   Plugin URI: http://marctv.de/blog/marctv-wordpress-plugins/
   Description: Trash your comments in the frontend with one click.
-  Version: 1.0.1
+  Version: 1.0.2
   Author: MarcDK
   Author URI: http://www.marctv.de
   License: GPL v2 - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
@@ -23,7 +23,7 @@ function get_trash_comment_link( $comment_text ) {
 		$nonce      = wp_create_nonce("delete-comment_$comment_id");
 		$del_nonce  = esc_html( '_wpnonce=' . $nonce );
 		$trash_url  = esc_url( "/wp-admin/comment.php?action=trashcomment&c=$comment_id&$del_nonce" );
-		$trash_link = "<small><a data-nonce='$nonce' data-cid='$comment_id' class='marctv-trash' href='$trash_url' title='" . esc_attr__( __( 'Move this comment to the trash', 'marctv-ajax-trash-comments' ) ) . "'>" . __( 'trash', 'marctv-ajax-trash-comments' ) . '</a></small>';
+		$trash_link = "<small><a data-nonce='$nonce' data-cid='$comment_id' class='marctv-trash-btn marctv-trash' href='$trash_url' title='" . esc_attr__( __( 'Move this comment to the trash', 'marctv-ajax-trash-comments' ) ) . "'>" . __( 'trash', 'marctv-ajax-trash-comments' ) . '</a></small>';
 
 		return $comment_text . $trash_link;
 	}
@@ -38,6 +38,11 @@ function add_marctv_ajax_comment_scripts() {
 
 	$params = array(
 		'adminurl' => admin_url( 'admin-ajax.php' ),
+		'trash_string' => __( 'trash', 'marctv-ajax-trash-comments' ),
+		'untrash_string' => __( 'untrash', 'marctv-ajax-trash-comments' ),
+		'trashing_string' => __( 'trashing', 'marctv-ajax-trash-comments' ),
+		'untrashing_string' => __( 'untrashing', 'marctv-ajax-trash-comments' ),
+		'error_string' => __( 'error', 'marctv-ajax-trash-comments' )
 	);
 
 	wp_localize_script( 'jquery.marctv_edc', 'marctvedc', $params );
@@ -56,21 +61,18 @@ function marctv_trash_comment() {
 		switch ( $comment_status ) {
 			case 'approved':
 				if( wp_trash_comment( $comment_id ) ) {
-					wp_die(  __( 'untrash', 'marctv-ajax-trash-comments' ) );
+					wp_die( 'trashed' );
 				}
-
 				break;
 			case 'trash':
 				if( wp_untrash_comment( $comment_id ) ) {
-					wp_die( __( 'trash', 'marctv-ajax-trash-comments' ) );
+					wp_die( 'untrashed' );
 				}
 				break;
 			default:
 				wp_die( 'error' );
 		}
-
 	}
-
 }
 
 function marctv_ajax_trash_comments_load_textdomain() {
