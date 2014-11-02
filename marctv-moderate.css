@@ -9,6 +9,12 @@ a.marctv-untrash {
     color: green;
 }
 
+a.marctv-done {
+    color: green;
+    pointer-events: none;
+    cursor: default;
+}
+
 a.marctv-trash {
     color: darkred;
 }
