@@ -3,11 +3,11 @@ Contributors: MarcDK
 Tags: MarcTV, comments, ajax, trash, delete, frontend, theme, german
 Requires at least: 3.0
 Tested up to: 4.0
-Stable tag: 1.1.0
+Stable tag: 1.1.3
 
 == Description ==
 
-Allows you trash and/or replace comments with your custom moderation text in one click in the frontend.
+Allows you to trash and/or replace comments with your custom moderation text in one click in the frontend.
 
 You need to be logged in as admin or any user with comment moderation permissions. A "trash" link will appear beneath
 all comments in the frontend. Now you can mark comments as "trash" and they will disappear after a page reload.
@@ -25,6 +25,14 @@ comments that needed moderation. So I decided to make my life (and yours) easier
 * Activate it
 
 == Changelog ==
+
+= 1.1.3 =
+
+Fixed empty moderation text on plugin activation.
+
+= 1.1.2 =
+
+Fixed renaming bug. Seems I am not allowed to rename the plugin file. I forgot to remove the old files.
 
 = 1.1.0 =
 

@@ -15,6 +15,8 @@ jQuery(function ($) {
             $(trashlink).text(marctvmoderate.untrashing_string + '…');
         }
 
+
+
         $.ajax({
             type: 'POST',
             url: marctvmoderate.adminurl,
