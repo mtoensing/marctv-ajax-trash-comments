@@ -1,58 +1,56 @@
-=== MarcTV Moderate Comments  ===
-Contributors: MarcDK
-Tags: MarcTV, comments, ajax, trash, delete, frontend, theme, german
+=== Report Comments ===
+
+Contributors: lefalque, marcdk
+Version: 1.2.4
+Tags: comments, admin, ajax, flag, report
 Requires at least: 3.0
-Tested up to: 4.0
-Stable tag: 1.1.3
+Tested up to: 4.01
+Stable tag: 1.2.4
+License: GPL2
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-== Description ==
+Grants visitors the ability to report inappropriate comments. Reported comments will show up in admin where they may be reviewed.
 
-Allows you to trash and/or replace comments with your custom moderation text in one click in the frontend.
+== Description == 
 
-You need to be logged in as admin or any user with comment moderation permissions. A "trash" link will appear beneath
-all comments in the frontend. Now you can mark comments as "trash" and they will disappear after a page reload.
-Don't worry: You can "untrash" them if it was a mistake until you reload.
+Adds a link next to the reply link below each comment, which allows visitors to flag comments as inappropriate. A sub page to comments in admin is added, where an administrator may review all the flagged comments and decide if they should be removed or not.
 
-You are also able to replace the comment text with a custom text which can be set in the settings. This action can not be undone.
+= Features =
 
-The plugin was written using phpStorm while I was on a trip to San Francisco, CA. My blog suffers from so many
-comments that needed moderation. So I decided to make my life (and yours) easier. ;-)
-
+* Ability for visitors to report comments they find offensive.
+* Once a flagged comment has been deemed ok, it wont be able to be flagged again.
+* Flagging is done via ajax for smoother experience for the visitors.
+* Decide whether all visitors or only logged in users can report comments.
+* Fully localized. Comes with English and Swedish translations.
 
 == Installation ==
 
-* Install plugin
-* Activate it
+1. Install and activate **Report Comments** via the WordPress.org repository.
+2. Flag comments at the front end.
+3. Review flagged comments in wp-admin.
 
 == Changelog ==
 
-= 1.1.3 =
+= 1.0 =
 
-Fixed empty moderation text on plugin activation.
+Merged
 
-= 1.1.2 =
+= 1.2.4 =
 
-Fixed renaming bug. Seems I am not allowed to rename the plugin file. I forgot to remove the old files.
+- Added german translation.
+- Fixed php notices.
 
-= 1.1.0 =
+= 1.2.3 =
+- Changed filter for how the report link was shown, now it appears even when threads are on their lowest level. You may need to style it (.report-comments) depending on your theme.
+- Removed requirement for PHP 5.3.0.
 
-* Fixed bug that did not show any comments for users who were not logged in.
-* New feature: replace comment text with your custom moderation text.
-* Link to new settings page in the frontend.
-* Renamed plugin.
+= 1.2 =
+- Added option to only let logged in users report comments (located at WordPress discussion settings).
+- Added link to edit any reported comments.
+- Added filter (report_comments_strings) to use if you want to change wording of any or all messages used by the plugin.
 
-= 1.0.3 =
+= 1.1 =
+- Bugfixes.
 
-* Added screenshot.
-
-= 1.0.2 =
-
-* Added ajax activity indicators.
-
-= 1.0.1 =
-
-* Fixed: Trash button was visible in the backend.
-
-== Screenshots ==
-
-1. The plugin in action.
+= 1.0 = 
+- Initial release.

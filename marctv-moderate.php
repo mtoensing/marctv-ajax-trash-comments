@@ -1,176 +1,426 @@
 <?php
 
 /*
-  Plugin Name: MarcTV Moderate Comments
-  Plugin URI: http://marctv.de/blog/marctv-wordpress-plugins/
-  Description: Trash and moderate comments in the frontend with one click.
-  Version: 1.1.3
-  Author: MarcDK
-  Author URI: http://www.marctv.de
-  License: GPL v2 - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+Plugin Name: MarcTV Moderate (NEW)
+Description: Grants visitors the ability to report inappropriate comments. Adds an additional page under comments in wp-admin, where an administrator may review all the reported comments and decide if they should be removed or not.
+Version:  1.2.4
+Author: Peter Berglund, Marc Tönsing
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+*/
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
-  your option) any later version.
+class MarcTVModerateComments
+{
 
- */
+    private $version = '1.2';
+    private $pluginPrefix = 'marctv-moderate';
+    private $pluginUrl;
+    private $strings;
 
-function add_marctv_ajax_comment_scripts() {
+    public function __construct()
+    {
+        $this->pluginUrl = plugins_url(false, __FILE__);
 
-	/* load css and js in the frontend theme */
-	wp_enqueue_style(
-		"jquery.marctv-moderate", WP_PLUGIN_URL . "/" . dirname( plugin_basename( __FILE__ ) ) . "/marctv-moderate.css", false, "1.0" );
+        load_plugin_textdomain('marctv-moderate', false, dirname(plugin_basename(__FILE__)) . '/language/');
 
-	wp_enqueue_script(
-		"jquery.marctv-moderate", WP_PLUGIN_URL . "/" . dirname( plugin_basename( __FILE__ ) ) . "/jquery.marctv-moderate.js", array( "jquery" ), "1.0", 0 );
+        $this->strings = $this->getStrings();
 
-	/* localize the strings for frontend js scripts */
-	$params = array(
-		'adminurl' => admin_url( 'admin-ajax.php' ),
-		'trash_string' => __( 'trash', 'marctv-moderate' ),
-		'untrash_string' => __( 'untrash', 'marctv-moderate' ),
-		'trashing_string' => __( 'trashing', 'marctv-moderate' ),
-		'untrashing_string' => __( 'untrashing', 'marctv-moderate' ),
-		'error_string' => __( 'error', 'marctv-moderate' ),
-		'replace_string' => __( 'replace comment text', 'marctv-moderate' ),
-		'replacing_string' => __( 'replacing comment text', 'marctv-moderate' ),
-		'replaced_string' => __( 'replaced comment text', 'marctv-moderate' ),
-		'already_replaced_string' =>  __( 'comment text already replaced', 'marctv-moderate' ),
-		'confirm_string' =>  __( 'This action can not be undone! Save and proceed?', 'marctv-moderate' ),
-		'warned' => get_option('marctv-moderate-warned')
-	);
+        if (is_admin()) {
+            $this->backendInit();
+        }
 
-	wp_localize_script( 'jquery.marctv-moderate', 'marctvmoderate', $params );
-}
+        $this->frontendInit();
 
-/**
- *
- * Generates the html links for the frontend
- *
- * @param $comment_text
- *
- * @return string
- */
-function get_marctv_ajax_links( $comment_text ) {
 
-	if ( current_user_can( 'moderate_comments' ) && is_single() ) {
-		$comment_id = get_comment_ID();
-		$nonce      = wp_create_nonce("delete-comment_$comment_id");
-		$del_nonce  = esc_html( '_wpnonce=' . $nonce );
-		$trash_url  = esc_url( "/wp-admin/comment.php?action=trashcomment&c=$comment_id&$del_nonce" );
-		$link = "<small>";
-		$link .= "<a data-nonce='$nonce' data-cid='$comment_id' class='marctv-trash-btn marctv-trash' href='$trash_url'
-		title='" . esc_attr__( __( 'Move this comment to the trash', 'marctv-moderate' ) ) . "'>"
-		         . __( 'trash', 'marctv-moderate' ) . '</a> | ';
-		$link .= "<a data-nonce='$nonce' data-cid='$comment_id' class='marctv-replace-btn marctv-replace' href='#'
-		title='" . esc_attr__( __( 'Replace comment text with customized moderation text.', 'marctv-moderate' ) )
-		         . "'>" . __( 'replace comment text', 'marctv-moderate' ) . '</a> | ';
+    }
 
-		$link .= "<a href='/wp-admin/options-general.php?page=marctv_moderate' title='" . esc_attr__( __( 'MarcTV moderate settings page', 'marctv-moderate' ) )
-		         . "'>" . __( 'Moderation settings', 'marctv-moderate' ) . '</a>';
+    /**
+     * Registers the reported comments page as a sub page to comments in admin.
+     */
+    public function registerCommentsPage()
+    {
+        if (!($count = get_transient($this->pluginPrefix . '_count'))) {
+            $count = $this->getCount();
+            set_transient($this->pluginPrefix . '_count', $count, 30 * MINUTE_IN_SECONDS);
+        }
+        $bubble = '<span class="update-plugins count-' . $count . '"><span class="update-count">' . number_format_i18n($count) . '</span></span>';
+        $text = $this->strings['menu_title'] . $bubble;
 
-		$link .= "</small>";
+        add_comments_page($this->strings['page_title'], $text, 'moderate_comments', $this->pluginPrefix . '_reported', array($this, 'commentsPage'));
+    }
 
-		return $comment_text . $link;
-	}
-	return $comment_text;
-}
+    /**
+     * Actions and filters for frontend.
+     */
+    public function frontendInit()
+    {
 
-function marctv_trash_comment() {
+        add_filter('comment_text', array($this, 'printModerateLinks'));
 
-	if ( current_user_can( 'moderate_comments' ) ) {
-		/* retrieve comment id from post ajax request and sanitize to number */
-		$comment_id = filter_input( INPUT_POST, 'cid', FILTER_SANITIZE_NUMBER_FLOAT );
-		$comment_status = wp_get_comment_status( $comment_id );
 
-		/* check if the ajax referrer is the trash link */
-		check_ajax_referer("delete-comment_$comment_id");
+        add_action('wp_ajax_' . $this->pluginPrefix . '_trash', array($this, 'trashComment'));
+        add_action('wp_ajax_' . $this->pluginPrefix . '_flag', array($this, 'flagComment'));
+        add_action('wp_ajax_nopriv_' . $this->pluginPrefix . '_flag', array($this, 'flagComment'));
+        add_action('wp_print_styles', array($this, 'enqueScripts'));
 
-		switch ( $comment_status ) {
-			case 'approved':
-				if( wp_trash_comment( $comment_id ) ) {
-					wp_die( 'trashed' );
-				}
-				break;
-			case 'trash':
-				if( wp_untrash_comment( $comment_id ) ) {
-					wp_die( 'untrashed' );
-				}
-				break;
-			default:
-				wp_die( 'error' );
-		}
-	}
-}
+    }
 
-function marctv_replace_comment() {
 
-	/* retrieve comment id from post ajax request and sanitize to number */
-	$comment_id = filter_input( INPUT_POST, 'cid', FILTER_SANITIZE_NUMBER_FLOAT );
+    public function enqueScripts()
+    {
 
-	/* check if the ajax referrer is the trash link */
-	check_ajax_referer("delete-comment_$comment_id");
+        /* Load css and js for vistors */
+        wp_enqueue_script($this->pluginPrefix . '_script', $this->pluginUrl . '/marctv-moderate.js', array('jquery'), $this->version, true);
 
-	/* if the user has been warned save that to the options. */
-	$warned = filter_input( INPUT_POST, 'warned', FILTER_VALIDATE_BOOLEAN );
+        wp_enqueue_style($this->pluginPrefix . '_style', $this->pluginUrl . "/marctv-moderate.css", false, $this->version);
 
-	if($warned == true ) {
-		update_option('marctv-moderate-warned', 1);
-	}
+        /* Load js for moderators and admins */
+        if (current_user_can('moderate_comments') && is_single()) {
+            wp_enqueue_script($this->pluginPrefix . '_admin_script', $this->pluginUrl . '/marctv-moderate-admin.js', array('jquery'), $this->version, true);
+        }
 
-	/* Replace comment with moderation text */
-	$comment_arr = array();
-	$comment_arr['comment_ID'] = $comment_id;
-	$comment_arr['comment_content'] = get_option('marctv-moderation-text');
-	if ( wp_update_comment( $comment_arr )) {
-		wp_die(1);
-	} else {
-		wp_die(0);
-	}
-}
+        $translations = array(
+            'pluginprefix' => $this->pluginPrefix,
+            'ajaxurl' => admin_url('admin-ajax.php'),
+            'confirm' => $this->strings['confirm'],
+            'adminurl' => admin_url('admin-ajax.php'),
+            'trash_string' => __('trash', $this->pluginPrefix),
+            'untrash_string' => __('untrash', $this->pluginPrefix),
+            'trashing_string' => __('trashing', $this->pluginPrefix),
+            'untrashing_string' => __('untrashing', $this->pluginPrefix),
+            'error_string' => __('error', $this->pluginPrefix),
+            'replace_string' => __('replace comment text', $this->pluginPrefix),
+            'replacing_string' => __('replacing comment text', $this->pluginPrefix),
+            'reporting_string' => __('reporting comment', $this->pluginPrefix),
+            'replaced_string' => __('replaced comment text', $this->pluginPrefix),
+            'already_replaced_string' => __('comment text already replaced', $this->pluginPrefix),
+            'confirm_string' => __('This action can not be undone! Save and proceed?', $this->pluginPrefix),
+            'warned' => get_option('marctv-moderate-warned')
+        );
 
-function marctv_moderate_plugin_menu(){
-	add_options_page('MarcTV Moderate Comments', 'MarcTV Moderate Comments', 'manage_options', 'marctv_moderate', 'marctv_moderate_plugin_menu_options');
-}
 
-function register_mysettings() {
-	//register our settings
-	register_setting( 'marctv-moderate-settings-group', 'marctv-moderation-text' );
-	register_setting( 'marctv-moderate-settings-group', 'marctv-moderate-warned' );
-}
+        wp_localize_script($this->pluginPrefix . '_script', 'marctvmoderatejs', $translations);
 
-function marctv_moderate_load_textdomain() {
-	load_plugin_textdomain( 'marctv-moderate', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
-}
 
-function marctv_moderate_plugin_menu_options(){
-	include('admin/marctv-moderate-admin.php');
-}
+    }
 
-function  marctv_moderate_activate() {
-    if(!get_option('marctv-moderation-text')) {
-		/* Loading the textdomain. I could not figure out to prevent this here. */
-		load_plugin_textdomain( 'marctv-moderate', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
+    /**
+     * Actions for backend.
+     */
+    public function backendInit()
+    {
+        add_action('admin_menu', array($this, 'registerCommentsPage'));
+        add_action('admin_menu', array($this, 'registerSettingsPage'));
+        add_action('admin_action_' . $this->pluginPrefix . '_ignore', array($this, 'ignoreReport'));
+        add_action('admin_init', array($this, 'registerSettings'));
+    }
 
-		/* If the moderation text is empty fill it with the default text */
-		update_option('marctv-moderation-text',__( '[incorrect topic]', 'marctv-moderate' ));
+
+    /**
+     * Add a menu item to the admin bar.
+     */
+    public function registerSettingsPage()
+    {
+        add_options_page('MarcTV Moderate Comments', 'MarcTV Moderate', 'manage_options', $this->pluginPrefix, array($this, 'showSettingsPage'));
+    }
+
+    /**
+     * Includes the settings page.
+     */
+    public function showSettingsPage()
+    {
+        include('pages/settings.php');
+    }
+
+    /**
+     * Sets all strings used by the plugin. Use the 'report_comments_strings' filter to modify them yourself.
+     * @return string
+     */
+    public function getStrings()
+    {
+        $strings = array(
+            // Title for link in the menu.
+            'menu_title' => __('Reported', $this->pluginPrefix),
+            // Title for the reported comments page.
+            'page_title' => __('Reported comments', $this->pluginPrefix),
+            // Confirm dialog on front end.
+            'confirm' => __('Are you sure you want to report this comment', $this->pluginPrefix),
+            // Message to show user after successfully reporting a comment.
+            'report_success' => __('The comment has been reported.', $this->pluginPrefix),
+            // Message to show user after reporting a comment has failed.
+            'report_failed' => __('The comment has been reported.', $this->pluginPrefix),
+            // Message to show user after successfully replacing a comment.
+            'replace_success' => __('replaced comment text', $this->pluginPrefix),
+            // Message to show user after replacing a comment has failed.
+            'replace_failed' => __('error while replacing comment text', $this->pluginPrefix),
+            // Text for the report link shown below each comment.
+            'report' => __('Report comment', $this->pluginPrefix),
+            // Text for the trash link shown below each comment.
+            'trash' => __('trash', $this->pluginPrefix),
+            // Text in admin for link that deems the comment OK.
+            'ignore_report' => __('Comment is ok', $this->pluginPrefix),
+            // Error message shown when a comment can't be found.
+            'invalid_comment' => __('The comment does not exist', $this->pluginPrefix),
+            // Header for settings field.
+            'settings_header' => __('Report Comments Settings', $this->pluginPrefix),
+            // Description for members only setting.
+            'settings_members_only' => __('Only logged in users may report comments', $this->pluginPrefix)
+        );
+
+        return apply_filters('report_comments_strings', $strings);
+    }
+
+    /**
+     * Fetches comments flagged as reported and displays them in a table.
+     */
+    public function commentsPage()
+    {
+        if (!current_user_can('moderate_comments')) {
+            die(__('Cheatin&#8217; uh?'));
+        }
+
+        global $wpdb;
+
+        $comments = $wpdb->get_results(
+            $wpdb->prepare("
+				SELECT * FROM $wpdb->commentmeta 
+				INNER JOIN $wpdb->comments on $wpdb->comments.comment_id = $wpdb->commentmeta.comment_id
+				WHERE $wpdb->comments.comment_approved = 1 AND meta_key = %s AND meta_value = 1 LIMIT 0, 25",
+                $this->pluginPrefix . '_reported')
+        );
+        $count = count($comments);
+        set_transient($this->pluginPrefix . '_count', $count, 1 * HOUR_IN_SECONDS);
+        include('pages/comments-list.php');
+    }
+
+    /**
+     * Returns how many reported comments are in the system.
+     * @return int
+     */
+    private function getCount()
+    {
+        global $wpdb;
+
+        $comments = $wpdb->get_results(
+            $wpdb->prepare("
+				SELECT * FROM $wpdb->commentmeta 
+				INNER JOIN $wpdb->comments on $wpdb->comments.comment_id = $wpdb->commentmeta.comment_id
+				WHERE $wpdb->comments.comment_approved = 1 AND meta_key = %s AND meta_value = 1 LIMIT 0, 10",
+                $this->pluginPrefix . '_reported')
+        );
+        return count($comments);
+    }
+
+    /**
+     * Flags a comment as reported. Won't flag a comment that has been flagged before and approved.
+     * @param  int $id Comment id.
+     * @return bool
+     */
+    private function flag($id)
+    {
+        $value = get_comment_meta($id, $this->pluginPrefix . '_reported', true);
+        if ($value < 0) {
+            return false;
+        }
+        return add_comment_meta($id, $this->pluginPrefix . '_reported', true, true);
+    }
+
+    /**
+     * Ajax-callable function which flags a comment as reported.
+     * Dies with message to be displayed to user.
+     */
+    public function flagComment()
+    {
+        $id = (int)$_POST['id'];
+        if (!wp_verify_nonce($_POST['_ajax_nonce'], "report-comment-" . $id) || $id != $_POST['id'] || !check_ajax_referer("report-comment-" . $id)) {
+            die(__('Cheatin&#8217; uh?'));
+        }
+
+        if (get_option($this->pluginPrefix . '_members_only') && !is_user_logged_in()) {
+            die(__('Cheatin&#8217; uh?'));
+        }
+
+        if (!$this->flag($id)) {
+            // This may happen when the comment has been reported once, but deemed ok by an admin, or
+            // when something went wrong. Either way, we won't bother the visitor with that information
+            // and we'll show the same message for both sucess and failed here by default.
+            die($this->strings['report_failed']);
+        }
+        die($this->strings['report_success']);
+    }
+
+    /**
+     * Ajax-callable function which replaces a comment with a defined text.
+     */
+    public function replaceComment()
+    {
+        $id = (int)$_POST['id'];
+        if (!wp_verify_nonce($_POST['_ajax_nonce'], "replace-comment-" . $id) || $id != $_POST['id'] || !check_ajax_referer("replace-comment-" . $id)) {
+            die(__('Cheatin&#8217; uh?'));
+        }
+
+        if (get_option($this->pluginPrefix . '_members_only') && !is_user_logged_in()) {
+            die(__('Cheatin&#8217; uh?'));
+        }
+
+
+        /* Replace comment with moderation text */
+        $comment_arr = array();
+        $comment_arr['comment_ID'] = $comment_id;
+        $comment_arr['comment_content'] = get_option('marctv-moderation-text');
+
+        if (!wp_update_comment($comment_arr)) {
+            die($this->strings['replace_failed']);
+        }
+
+        die($this->strings['replace_success']);
+    }
+
+    /**
+     * Ajax-callable function which puts a comment in the trash.
+     */
+    public function trashComment()
+    {
+        $id = (int)$_POST['id'];
+
+        $comment_status = wp_get_comment_status($id);
+
+        if (!wp_verify_nonce($_POST['_ajax_nonce'], "trash-comment-" . $id) || $id != $_POST['id'] || !check_ajax_referer("trash-comment-" . $id)) {
+            die(__('Cheatin&#8217; uh?'));
+        }
+
+        if (get_option($this->pluginPrefix . '_members_only') && !is_user_logged_in()) {
+            die(__('Cheatin&#8217; uh?'));
+        }
+
+
+        switch ($comment_status) {
+            case 'approved':
+                if (wp_trash_comment($id)) {
+                    die('trashed');
+                }
+                break;
+            case 'trash':
+                if (wp_untrash_comment($id)) {
+                    die('untrashed');
+                }
+                break;
+            default:
+                die('error');
+        }
+    }
+
+    /**
+     * Constructs "report this comment" link.
+     * @return string
+     */
+    private function getReportLink()
+    {
+        $id = get_comment_ID();
+        $class = $this->pluginPrefix . "-report";
+        $nonce = wp_create_nonce("report-comment-" . $id);
+
+        $link = sprintf('<a href="#" data-nonce="%s" data-cid="%s" class="%s">%s</a>',
+            $nonce,
+            $id,
+            $class,
+            $this->strings['report']
+        );
+        return $link;
+    }
+
+    /**
+     * Constructs "trash this comment" link.
+     * @return string
+     */
+    private function getTrashLink()
+    {
+        $id = get_comment_ID();
+        $class = $this->pluginPrefix . "-trash";
+        $nonce = wp_create_nonce("trash-comment-" . $id);
+        $link = sprintf('<a href="#" data-nonce="%s" data-cid="%s" class="%s">%s</a>',
+            $nonce,
+            $id,
+            $class,
+            $this->strings['trash']
+        );
+        return $link;
+    }
+
+
+    /**
+     * Appends a "report this comment" link after the "reply" link below a comment.
+     */
+    public function printModerateLinks($comment_reply_link) {
+
+        if (current_user_can('moderate_comments')) {
+            return $comment_reply_link . '<br /><br />' . $this->getReportLink() . ' | ' . $this->getTrashLink();
+        } else {
+            if (!get_option($this->pluginPrefix . '_members_only')) {
+                return $comment_reply_link . '<br /><br />' . $this->getReportLink();
+            }
+        }
+
+        return $comment_reply_link;
+    }
+
+    /**
+     * Unflags the comment as reported.
+     */
+    public function ignoreReport()
+    {
+        if (isset($_GET['c']) && isset($_GET['_wpnonce'])) {
+            if (!wp_verify_nonce($_GET['_wpnonce'], 'ignore-report_' . $_GET['c']) || !current_user_can('moderate_comments')) {
+                die(__('Cheatin&#8217; uh?'));
+            }
+            $id = absint($_GET['c']);
+            if (!get_comment($id)) {
+                die($this->strings['invalid_comment']);
+            }
+            // We set the meta value to -1, and by that it wont be able to be reported again.
+            // Once deemed ok -> always ok.
+            # todo: add this as an option (being able to report the comment again or not)
+            update_comment_meta($id, $this->pluginPrefix . '_reported', -1);
+
+            wp_redirect($_SERVER['HTTP_REFERER']);
+        }
+    }
+
+    /**
+     * Registers settings for plugin.
+     */
+    public function registerSettings()
+    {
+        add_settings_section($this->pluginPrefix . '_settings',
+            $this->strings['settings_header'],
+            null,
+            'discussion'
+        );
+
+        add_settings_field($this->pluginPrefix . '_members_only',
+            $this->strings['settings_members_only'],
+            array($this, 'settingsCallback'),
+            'discussion',
+            $this->pluginPrefix . '_settings'
+        );
+
+        register_setting($this->pluginPrefix . '-settings-group', 'marctv-moderation-text');
+        register_setting($this->pluginPrefix . '-settings-group', $this->pluginPrefix . '_members_only');
+        register_setting('discussion', $this->pluginPrefix . '_members_only');
+    }
+
+    /**
+     * Displays settings field
+     */
+    public function settingsCallback()
+    {
+        ?>
+        <input name="<?php echo $this->pluginPrefix . '_members_only'; ?>"
+               type="checkbox" <?php checked(get_option($this->pluginPrefix . '_members_only'), 'on') ?> />
+    <?php
     }
 }
 
-add_filter( 'comment_text', 'get_marctv_ajax_links', 99 );
-
-add_action( 'admin_init', 'register_mysettings' );
-
-add_action( 'wp_print_styles', 'add_marctv_ajax_comment_scripts' );
-
-add_action( "wp_ajax_marctv_trash_comment", "marctv_trash_comment" );
-
-add_action( "wp_ajax_marctv_replace_comment", "marctv_replace_comment" );
-
-add_action( 'plugins_loaded', 'marctv_moderate_load_textdomain' );
-
-add_action('admin_menu','marctv_moderate_plugin_menu');
-
-register_activation_hook( __FILE__, 'marctv_moderate_activate' );
+/**
+ * Initialize plugin.
+ */
+new MarcTVModerateComments();

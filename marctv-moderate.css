@@ -1,25 +1,25 @@
-a.marctv-error {
+a.marctv-moderate-error {
     color: red;
     font-weight: 700;
     pointer-events: none;
     cursor: default;
 }
 
-a.marctv-untrash {
+a.marctv-moderate-untrash {
     color: green;
 }
 
-a.marctv-done {
+a.marctv-moderate-done {
     color: green;
     pointer-events: none;
     cursor: default;
 }
 
-a.marctv-trash {
+a.marctv-moderate-trash {
     color: darkred;
 }
 
-a.marctv-loading {
+a.marctv-moderate-loading {
     color: #a9a9a9;
     text-decoration: none;
     pointer-events: none;
