@@ -1,6 +1,5 @@
 === MarcTV Moderate Comments ===
 Contributors:  MarcDK, lefalque
-Version: 1.0
 Tags: comments, admin, ajax, flag, report, moderate, trash, replace
 Requires at least: 3.0
 Tested up to: 4.01
@@ -8,7 +7,7 @@ Stable tag: 1.2
 License: GPL2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Grants visitors the ability to report inappropriate comments. Admins are able to replace and trash comments in the frontend.
+Grants visitors the ability to report inappropriate comments and admins to replace and trash them in the frontend.
 
 == Description == 
 
@@ -16,14 +15,10 @@ Adds a link next to the reply link below each comment, which allows visitors to 
 A sub page to comments in admin is added, where an administrator may review all the flagged comments and decide
 if they should be removed or not.
 
-Allow admins to trash or replace comments with your custom moderation text in one click in the frontend.
-
-You need to be logged in as admin or any user with comment moderation permissions. A "trash" link will appear beneath
-all comments in the frontend. Now you can mark comments as "trash" and they will disappear after a page reload.
-Don't worry: You can "untrash" them if it was a mistake until you reload.
-
-You are also able to replace the comment text with a custom text which can be set in the settings.
-This action can not be undone.
+Admins or logged-in users with comment moderation permissions are able trash or replace comments with
+one click in the frontend. This action can not be undone. A "trash" link will appear bellow all comments.
+Don't worry: You can untrash them if until you reload. You are also able to replace the comment text with a custom
+text which can be set in the settings.
 
 = Features =
 
