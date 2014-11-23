@@ -1,17 +1,19 @@
 <?php
 
 /*
-Plugin Name: MarcTV Moderate (NEW)
-Description: Grants visitors the ability to report inappropriate comments. Adds an additional page under comments in wp-admin, where an administrator may review all the reported comments and decide if they should be removed or not.
-Version:  1.2.4
-Author: Peter Berglund, Marc Tönsing
+Plugin Name: MarcTV Moderate Comments
+Plugin URI: http://marctv.de/blog/marctv-wordpress-plugins/
+Description: Grants visitors the ability to report inappropriate comments. Admins are able to replace and trash comments in the frontend.
+Version:  1.0
+Author:  Marc Tönsing, Peter Berglund
+Author URI: marctv.de
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 */
 
 class MarcTVModerateComments
 {
 
-    private $version = '1.2';
+    private $version = '1.0';
     private $pluginPrefix = 'marctv-moderate';
     private $pluginUrl;
     private $strings;
@@ -30,7 +32,22 @@ class MarcTVModerateComments
 
         $this->frontendInit();
 
+    }
 
+    /**
+     * Defines what happens on plugin activation.
+     */
+    public function activate()
+    {
+
+        /* if comment moderation text is not set get the localized string. */
+        if (!get_option('marctv-moderation-text')) {
+            /* Loading the textdomain. I could not figure out to prevent this here. */
+            load_plugin_textdomain('marctv-moderate', false, dirname(plugin_basename(__FILE__)) . '/languages/');
+
+            /* If the moderation text is empty fill it with the default text */
+            update_option('marctv-moderation-text', __('[incorrect topic]', 'marctv-moderate'));
+        }
     }
 
     /**
@@ -53,11 +70,10 @@ class MarcTVModerateComments
      */
     public function frontendInit()
     {
-
         add_filter('comment_text', array($this, 'printModerateLinks'));
 
-
         add_action('wp_ajax_' . $this->pluginPrefix . '_trash', array($this, 'trashComment'));
+        add_action('wp_ajax_' . $this->pluginPrefix . '_replace', array($this, 'replaceComment'));
         add_action('wp_ajax_' . $this->pluginPrefix . '_flag', array($this, 'flagComment'));
         add_action('wp_ajax_nopriv_' . $this->pluginPrefix . '_flag', array($this, 'flagComment'));
         add_action('wp_print_styles', array($this, 'enqueScripts'));
@@ -81,20 +97,17 @@ class MarcTVModerateComments
         $translations = array(
             'pluginprefix' => $this->pluginPrefix,
             'ajaxurl' => admin_url('admin-ajax.php'),
-            'confirm' => $this->strings['confirm'],
+            'confirm_report' => $this->strings['confirm_report'],
+            'confirm_replace' => $this->strings['confirm_replace'],
             'adminurl' => admin_url('admin-ajax.php'),
-            'trash_string' => __('trash', $this->pluginPrefix),
-            'untrash_string' => __('untrash', $this->pluginPrefix),
-            'trashing_string' => __('trashing', $this->pluginPrefix),
-            'untrashing_string' => __('untrashing', $this->pluginPrefix),
-            'error_string' => __('error', $this->pluginPrefix),
-            'replace_string' => __('replace comment text', $this->pluginPrefix),
-            'replacing_string' => __('replacing comment text', $this->pluginPrefix),
-            'reporting_string' => __('reporting comment', $this->pluginPrefix),
-            'replaced_string' => __('replaced comment text', $this->pluginPrefix),
-            'already_replaced_string' => __('comment text already replaced', $this->pluginPrefix),
-            'confirm_string' => __('This action can not be undone! Save and proceed?', $this->pluginPrefix),
-            'warned' => get_option('marctv-moderate-warned')
+            'trash_string' => $this->strings['trash'],
+            'untrash_string' => $this->strings['untrash'],
+            'trashing_string' => $this->strings['trashing'],
+            'untrashing_string' => $this->strings['untrashing'],
+            'error_string' => $this->strings['error'],
+            'replacing_string' => $this->strings['replacing'],
+            'reporting_string' => $this->strings['reporting'],
+            'replaced_string' => $this->strings['replace_success']
         );
 
 
@@ -111,6 +124,7 @@ class MarcTVModerateComments
         add_action('admin_menu', array($this, 'registerCommentsPage'));
         add_action('admin_menu', array($this, 'registerSettingsPage'));
         add_action('admin_action_' . $this->pluginPrefix . '_ignore', array($this, 'ignoreReport'));
+        add_action('admin_action_' . $this->pluginPrefix . '_replace', array($this, 'replaceCommentReport'));
         add_action('admin_init', array($this, 'registerSettings'));
     }
 
@@ -120,7 +134,7 @@ class MarcTVModerateComments
      */
     public function registerSettingsPage()
     {
-        add_options_page('MarcTV Moderate Comments', 'MarcTV Moderate', 'manage_options', $this->pluginPrefix, array($this, 'showSettingsPage'));
+        add_options_page('MarcTV Moderate Comments', 'Moderate Comments', 'manage_options', $this->pluginPrefix, array($this, 'showSettingsPage'));
     }
 
     /**
@@ -139,31 +153,47 @@ class MarcTVModerateComments
     {
         $strings = array(
             // Title for link in the menu.
-            'menu_title' => __('Reported', $this->pluginPrefix),
+            'menu_title' => __('Reported', 'marctv-moderate'),
             // Title for the reported comments page.
-            'page_title' => __('Reported comments', $this->pluginPrefix),
-            // Confirm dialog on front end.
-            'confirm' => __('Are you sure you want to report this comment', $this->pluginPrefix),
+            'page_title' => __('Reported comments', 'marctv-moderate'),
+            // Confirm dialog on front end for replace.
+            'confirm_replace' => __('Are you sure you want to replace this comment? This action can not be undone!', 'marctv-moderate'),
+            // Confirm dialog on front end for reporting.
+            'confirm_report' => __('Are you sure you want to report this comment?', 'marctv-moderate'),
             // Message to show user after successfully reporting a comment.
-            'report_success' => __('The comment has been reported.', $this->pluginPrefix),
+            'report_success' => __('The comment has been reported.', 'marctv-moderate'),
             // Message to show user after reporting a comment has failed.
-            'report_failed' => __('The comment has been reported.', $this->pluginPrefix),
+            'report_failed' => __('The comment has been reported.', 'marctv-moderate'),
             // Message to show user after successfully replacing a comment.
-            'replace_success' => __('replaced comment text', $this->pluginPrefix),
+            'replace_success' => __('The comment text has been replaced', 'marctv-moderate'),
             // Message to show user after replacing a comment has failed.
-            'replace_failed' => __('error while replacing comment text', $this->pluginPrefix),
+            'replace_failed' => __('The comment has already been replaced', 'marctv-moderate'),
             // Text for the report link shown below each comment.
-            'report' => __('Report comment', $this->pluginPrefix),
+            'report' => __('Report', 'marctv-moderate'),
             // Text for the trash link shown below each comment.
-            'trash' => __('trash', $this->pluginPrefix),
+            'trash' => __('Trash', 'marctv-moderate'),
+            // Text for the replace link shown below each comment.
+            'untrash' => __('Untrash', 'marctv-moderate'),
+            // Text for the replace link shown below each comment.
+            'replace' => __('Replace', 'marctv-moderate'),
             // Text in admin for link that deems the comment OK.
-            'ignore_report' => __('Comment is ok', $this->pluginPrefix),
+            'ignore_report' => __('Comment is ok', 'marctv-moderate'),
+            // Action of moving a comment in the trash.
+            'trashing' => __('trashing', 'marctv-moderate'),
+            // Action of moving a comment out of the trash.
+            'untrashing' => __('untrashing', 'marctv-moderate'),
+            // Error message
+            'error' => __('an error occurred.', 'marctv-moderate'),
+            // Action while replacing a comment.
+            'replacing' => __('replacing', 'marctv-moderate'),
+            // Action while reporting a comment.
+            'reporting' => __('reporting', 'marctv-moderate'),
             // Error message shown when a comment can't be found.
-            'invalid_comment' => __('The comment does not exist', $this->pluginPrefix),
+            'invalid_comment' => __('The comment does not exist', 'marctv-moderate'),
             // Header for settings field.
-            'settings_header' => __('Report Comments Settings', $this->pluginPrefix),
+            'settings_header' => __('Report Comments Settings', 'marctv-moderate'),
             // Description for members only setting.
-            'settings_members_only' => __('Only logged in users may report comments', $this->pluginPrefix)
+            'settings_members_only' => __('Only logged in users may report comments', 'marctv-moderate')
         );
 
         return apply_filters('report_comments_strings', $strings);
@@ -262,10 +292,9 @@ class MarcTVModerateComments
             die(__('Cheatin&#8217; uh?'));
         }
 
-
         /* Replace comment with moderation text */
         $comment_arr = array();
-        $comment_arr['comment_ID'] = $comment_id;
+        $comment_arr['comment_ID'] = $id;
         $comment_arr['comment_content'] = get_option('marctv-moderation-text');
 
         if (!wp_update_comment($comment_arr)) {
@@ -346,21 +375,41 @@ class MarcTVModerateComments
         return $link;
     }
 
+    /**
+     * Constructs "replace this comment" link.
+     * @return string
+     */
+    private function getReplaceLink()
+    {
+        $id = get_comment_ID();
+        $class = $this->pluginPrefix . "-replace";
+        $nonce = wp_create_nonce("replace-comment-" . $id);
+        $link = sprintf('<a href="#" data-nonce="%s" data-cid="%s" class="%s">%s</a>',
+            $nonce,
+            $id,
+            $class,
+            $this->strings['replace']
+        );
+        return $link;
+    }
+
 
     /**
      * Appends a "report this comment" link after the "reply" link below a comment.
      */
-    public function printModerateLinks($comment_reply_link) {
-
-        if (current_user_can('moderate_comments')) {
-            return $comment_reply_link . '<br /><br />' . $this->getReportLink() . ' | ' . $this->getTrashLink();
-        } else {
-            if (!get_option($this->pluginPrefix . '_members_only')) {
-                return $comment_reply_link . '<br /><br />' . $this->getReportLink();
+    public function printModerateLinks($comment_reply_link)
+    {
+        if (is_single()) {
+            if (current_user_can('moderate_comments')) {
+                return $comment_reply_link . '<br /><br />' . $this->getReportLink() . ' | ' . $this->getTrashLink() . ' | ' . $this->getReplaceLink();
+            } else {
+                if (!get_option($this->pluginPrefix . '_members_only')) {
+                    return $comment_reply_link . '<br /><br />' . $this->getReportLink();
+                }
             }
         }
-
         return $comment_reply_link;
+
     }
 
     /**
@@ -384,6 +433,34 @@ class MarcTVModerateComments
             wp_redirect($_SERVER['HTTP_REFERER']);
         }
     }
+
+    /**
+     * replaces the comment in the reported comments list.
+     */
+    public function replaceCommentReport()
+    {
+        if (isset($_GET['c']) && isset($_GET['_wpnonce'])) {
+            if (!wp_verify_nonce($_GET['_wpnonce'], 'replace-comment-' . $_GET['c']) || !current_user_can('moderate_comments')) {
+                die(__('Cheatin&#8217; uh?'));
+            }
+            $id = absint($_GET['c']);
+            if (!get_comment($id)) {
+                die($this->strings['invalid_comment']);
+            }
+
+            /* Replace comment with moderation text */
+            $comment_arr = array();
+            $comment_arr['comment_ID'] = $id;
+            $comment_arr['comment_content'] = get_option('marctv-moderation-text');
+
+            if (!wp_update_comment($comment_arr)) {
+                die($this->strings['replace_failed']);
+            }
+
+            wp_redirect($_SERVER['HTTP_REFERER']);
+        }
+    }
+
 
     /**
      * Registers settings for plugin.
@@ -419,6 +496,16 @@ class MarcTVModerateComments
     <?php
     }
 }
+
+
+/* Activation */
+register_activation_hook(
+    __FILE__,
+    array(
+        'MarcTVModerateComments',
+        'activate'
+    )
+);
 
 /**
  * Initialize plugin.

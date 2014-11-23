@@ -1,4 +1,8 @@
 jQuery(function ($) {
+
+    /*
+     * ajax button for trashing a comment.
+     */
     $('.' + marctvmoderatejs.pluginprefix + '-trash').click(function () {
 
         var element = $(this);
@@ -41,6 +45,45 @@ jQuery(function ($) {
             },
             dataType: 'html'
         });
+
+        return false;
+    });
+
+    /*
+     * ajax button for comment text replacement.
+     */
+    $('.' + marctvmoderatejs.pluginprefix + '-replace').click(function () {
+
+        if (confirm(marctvmoderatejs.confirm_replace)) {
+            var element = $(this);
+            var cid = $(this).data('cid');
+            var nonce = $(this).data('nonce');
+
+            $(element).addClass('marctv-moderate-loading');
+            $(element).text(marctvmoderatejs.replacing_string + '…');
+
+
+            $.ajax({
+                type: 'POST',
+                url: marctvmoderatejs.adminurl,
+                data: {
+                    action: marctvmoderatejs.pluginprefix + '_replace',
+                    id: cid,
+                    _ajax_nonce: nonce
+                },
+                success: function (response_data) {
+                    var msg = $(document.createElement('span'))
+                        .addClass(marctvmoderatejs.pluginprefix + '-replace ' + marctvmoderatejs.pluginprefix + '-success')
+
+                        .text(response_data);
+
+                    $(element).removeClass('marctv-moderate-loading').replaceWith(msg);
+
+                },
+                dataType: 'html'
+            });
+
+        }
 
         return false;
     });

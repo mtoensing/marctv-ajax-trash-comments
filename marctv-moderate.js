@@ -2,7 +2,7 @@ jQuery(function ($) {
 
     $('.' + marctvmoderatejs.pluginprefix + '-report').click(function () {
 
-        if (confirm(marctvmoderatejs.confirm + '?')) {
+        if (confirm(marctvmoderatejs.confirm_report)) {
             var element = $(this);
             var cid = $(this).data('cid');
             var nonce = $(this).data('nonce');
@@ -22,7 +22,7 @@ jQuery(function ($) {
                     $(element).removeClass('marctv-moderate-loading');
 
                     var msg = $(document.createElement('span'))
-                        .addClass(marctvmoderatejs.pluginprefix + '-report')
+                        .addClass(marctvmoderatejs.pluginprefix + '-report ' + marctvmoderatejs.pluginprefix + '-success')
                         .text(response_data);
                     $(element).replaceWith(msg);
                 },

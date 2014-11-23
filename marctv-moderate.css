@@ -9,6 +9,11 @@ a.marctv-moderate-untrash {
     color: green;
 }
 
+span.marctv-moderate-success,
+a.marctv-ignore-report {
+    color: green;
+}
+
 a.marctv-moderate-done {
     color: green;
     pointer-events: none;
@@ -17,6 +22,10 @@ a.marctv-moderate-done {
 
 a.marctv-moderate-trash {
     color: darkred;
+}
+
+a.marctv-moderate-replace {
+    color: darkorange;
 }
 
 a.marctv-moderate-loading {
