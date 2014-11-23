@@ -1,11 +1,10 @@
 === MarcTV Moderate Comments ===
-
 Contributors:  MarcDK, lefalque
 Version: 1.0
 Tags: comments, admin, ajax, flag, report, moderate, trash, replace
 Requires at least: 3.0
 Tested up to: 4.01
-Stable tag: 1.0
+Stable tag: 1.2
 License: GPL2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -43,7 +42,38 @@ This action can not be undone.
 
 == Changelog ==
 
-= 1.0 =
+= 1.2 =
 
-* Initial release. This is a feature merge of the plugin "ReportComments" by lefalque and "Ajax Trash and Replace
+* This is a feature merge of the plugin "ReportComments" by lefalque and "Ajax Trash and Replace
 Comments" by myself. I added a german translation and fixed php notices.
+
+= 1.1.3 =
+
+Fixed empty moderation text on plugin activation.
+
+= 1.1.2 =
+
+Fixed renaming bug. Seems I am not allowed to rename the plugin file. I forgot to remove the old files.
+
+= 1.1.0 =
+
+* Fixed bug that did not show any comments for users who were not logged in.
+* New feature: replace comment text with your custom moderation text.
+* Link to new settings page in the frontend.
+* Renamed plugin.
+
+= 1.0.3 =
+
+* Added screenshot.
+
+= 1.0.2 =
+
+* Added ajax activity indicators.
+
+= 1.0.1 =
+
+* Fixed: Trash button was visible in the backend.
+
+== Screenshots ==
+
+1. The plugin in action.
