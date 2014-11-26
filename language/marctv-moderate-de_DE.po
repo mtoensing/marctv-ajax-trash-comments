@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: MarcTV Moderate Comments\n"
-"POT-Creation-Date: 2014-11-23 14:59+0100\n"
-"PO-Revision-Date: 2014-11-23 15:05+0100\n"
+"POT-Creation-Date: 2014-11-24 14:41+0100\n"
+"PO-Revision-Date: 2014-11-24 14:41+0100\n"
 "Last-Translator: Marc Tönsing <marc@marctv.de>\n"
 "Language-Team: Marc Tönsing <marc@marctv.de>\n"
 "Language: de_DE\n"
@@ -18,96 +18,96 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: marctv-moderate.php:46
+#: marctv-moderate.php:48
 msgid "[incorrect topic]"
 msgstr "[Am Thema vorbei]"
 
-#: marctv-moderate.php:151
+#: marctv-moderate.php:155
 msgid "Reported"
 msgstr "Gemeldet"
 
-#: marctv-moderate.php:153
+#: marctv-moderate.php:157
 msgid "Reported comments"
 msgstr "Gemeldete Kommentare"
 
-#: marctv-moderate.php:155
+#: marctv-moderate.php:159
 msgid ""
 "Are you sure you want to replace this comment? This action can not be undone!"
 msgstr ""
 "Bist Du sicher, dass du diesen Kommentar ersetzen willst? Dieser Vorgang "
 "kann nicht rückgängig gemacht werden!"
 
-#: marctv-moderate.php:157
+#: marctv-moderate.php:161
 msgid "Are you sure you want to report this comment?"
 msgstr "Bist Du sicher, dass du diesen Kommentar melden willst?"
 
-#: marctv-moderate.php:159 marctv-moderate.php:161
-msgid "The comment has been reported."
-msgstr "Der Kommentar wurde gemeldet."
+#: marctv-moderate.php:163 marctv-moderate.php:165
+msgid "The comment has been reported"
+msgstr "Der Kommentar wurde gemeldet"
 
-#: marctv-moderate.php:163
+#: marctv-moderate.php:167
 msgid "The comment text has been replaced"
 msgstr "Der Kommentar wurde ersetzt"
 
-#: marctv-moderate.php:165
+#: marctv-moderate.php:169
 msgid "The comment has already been replaced"
 msgstr "Dieser Kommentar wurde bereits ersetzt."
 
-#: marctv-moderate.php:167
+#: marctv-moderate.php:171
 msgid "Report"
 msgstr "Melden"
 
-#: marctv-moderate.php:169
+#: marctv-moderate.php:173
 msgid "Trash"
 msgstr "Papierkorb"
 
-#: marctv-moderate.php:171
+#: marctv-moderate.php:175
 msgid "Untrash"
 msgstr "Wiederherstellen"
 
-#: marctv-moderate.php:173
+#: marctv-moderate.php:177
 msgid "Replace"
 msgstr "Ersetzen"
 
-#: marctv-moderate.php:175
+#: marctv-moderate.php:179
 msgid "Comment is ok"
 msgstr "Kommentar ist ok"
 
-#: marctv-moderate.php:177
+#: marctv-moderate.php:181
 msgid "trashing"
 msgstr "werfe weg"
 
-#: marctv-moderate.php:179
+#: marctv-moderate.php:183
 msgid "untrashing"
 msgstr "stelle wieder her"
 
-#: marctv-moderate.php:181
+#: marctv-moderate.php:185
 msgid "an error occurred."
 msgstr "Ein Fehler ist aufgetreten."
 
-#: marctv-moderate.php:183
+#: marctv-moderate.php:187
 msgid "replacing"
 msgstr "ersetze"
 
-#: marctv-moderate.php:185
+#: marctv-moderate.php:189
 msgid "reporting"
 msgstr "melde"
 
-#: marctv-moderate.php:187
+#: marctv-moderate.php:191
 msgid "The comment does not exist"
 msgstr "Der Kommentar existiert nicht"
 
-#: marctv-moderate.php:189
+#: marctv-moderate.php:193
 msgid "Report Comments Settings"
 msgstr "Einstellungen für Kommentare melden"
 
-#: marctv-moderate.php:191 pages/settings.php:33
+#: marctv-moderate.php:195 pages/settings.php:33
 msgid "Only logged in users may report comments"
 msgstr "Nur angemeldete Benutzer dürfen Kommentare melden."
 
-#: marctv-moderate.php:203 marctv-moderate.php:260 marctv-moderate.php:264
-#: marctv-moderate.php:283 marctv-moderate.php:287 marctv-moderate.php:311
-#: marctv-moderate.php:315 marctv-moderate.php:411 marctv-moderate.php:433
+#: marctv-moderate.php:207 marctv-moderate.php:264 marctv-moderate.php:268
+#: marctv-moderate.php:287 marctv-moderate.php:291 marctv-moderate.php:316
+#: marctv-moderate.php:320 marctv-moderate.php:421 marctv-moderate.php:443
 #: pages/comments-list.php:3 pages/settings.php:3
 msgid "Cheatin&#8217; uh?"
 msgstr "Nicht Mogeln!"

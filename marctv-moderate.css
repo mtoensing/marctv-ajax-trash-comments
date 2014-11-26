@@ -1,3 +1,17 @@
+.marctv-moderate-links {
+    display: none;
+}
+
+p.marctv-moderate-links,
+p.marctv-moderate-links a,
+p.marctv-moderate-links span {
+    font-size: 90%;
+}
+
+.js .marctv-moderate-links {
+    display: block;
+}
+
 a.marctv-moderate-error {
     color: red;
     font-weight: 700;
@@ -34,3 +48,5 @@ a.marctv-moderate-loading {
     pointer-events: none;
     cursor: default;
 }
+
+.js

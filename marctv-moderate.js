@@ -1,5 +1,7 @@
 jQuery(function ($) {
 
+    $('body').addClass('js');
+
     $('.' + marctvmoderatejs.pluginprefix + '-report').click(function () {
 
         if (confirm(marctvmoderatejs.confirm_report)) {

@@ -3,8 +3,8 @@
 Plugin Name: MarcTV Moderate Comments
 Plugin URI: http://marctv.de/blog/marctv-wordpress-plugins/
 Description: Grants visitors the ability to report inappropriate comments and admins to replace and trash them in the frontend.
-Version:  1.2
-Author:  Marc Tönsing, Peter Berglund
+Version:  1.2.4
+Author:  Marc Tönsing
 Author URI: marctv.de
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 */
@@ -12,7 +12,7 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 class MarcTVModerateComments
 {
 
-    private $version = '1.2';
+    private $version = '1.2.4';
     private $pluginPrefix = 'marctv-moderate';
     private $pluginUrl;
     private $strings;
@@ -160,9 +160,9 @@ class MarcTVModerateComments
             // Confirm dialog on front end for reporting.
             'confirm_report' => __('Are you sure you want to report this comment?', 'marctv-moderate'),
             // Message to show user after successfully reporting a comment.
-            'report_success' => __('The comment has been reported.', 'marctv-moderate'),
+            'report_success' => __('The comment has been reported', 'marctv-moderate'),
             // Message to show user after reporting a comment has failed.
-            'report_failed' => __('The comment has been reported.', 'marctv-moderate'),
+            'report_failed' => __('The comment has been reported', 'marctv-moderate'),
             // Message to show user after successfully replacing a comment.
             'replace_success' => __('The comment text has been replaced', 'marctv-moderate'),
             // Message to show user after replacing a comment has failed.
@@ -347,7 +347,7 @@ class MarcTVModerateComments
         $class = $this->pluginPrefix . "-report";
         $nonce = wp_create_nonce("report-comment-" . $id);
 
-        $link = sprintf('<a href="#" data-nonce="%s" data-cid="%s" class="%s">%s</a>',
+        $link = sprintf('<a rel="nofollow" href="javascript:void(0)" data-nonce="%s" data-cid="%s" class="%s">%s</a>',
             $nonce,
             $id,
             $class,
@@ -365,7 +365,7 @@ class MarcTVModerateComments
         $id = get_comment_ID();
         $class = $this->pluginPrefix . "-trash";
         $nonce = wp_create_nonce("trash-comment-" . $id);
-        $link = sprintf('<a href="#" data-nonce="%s" data-cid="%s" class="%s">%s</a>',
+        $link = sprintf('<a href="javascript:void(0)" data-nonce="%s" data-cid="%s" class="%s">%s</a>',
             $nonce,
             $id,
             $class,
@@ -383,7 +383,7 @@ class MarcTVModerateComments
         $id = get_comment_ID();
         $class = $this->pluginPrefix . "-replace";
         $nonce = wp_create_nonce("replace-comment-" . $id);
-        $link = sprintf('<a href="#" data-nonce="%s" data-cid="%s" class="%s">%s</a>',
+        $link = sprintf('<a href="javascript:void(0)" data-nonce="%s" data-cid="%s" class="%s">%s</a>',
             $nonce,
             $id,
             $class,
@@ -400,10 +400,10 @@ class MarcTVModerateComments
     {
         if (is_single()) {
             if (current_user_can('moderate_comments')) {
-                return $comment_reply_link . '<br /><br />' . $this->getReportLink() . ' | ' . $this->getTrashLink() . ' | ' . $this->getReplaceLink();
+                return $comment_reply_link . '<p class="marctv-moderate-links">' . $this->getReportLink() . ' | ' . $this->getTrashLink() . ' | ' . $this->getReplaceLink() . '</p>';
             } else {
                 if (!get_option($this->pluginPrefix . '_members_only')) {
-                    return $comment_reply_link . '<br /><br />' . $this->getReportLink();
+                    return $comment_reply_link . '<p class="marctv-moderate-links">' . $this->getReportLink() . '</p>';
                 }
             }
         }
@@ -455,6 +455,11 @@ class MarcTVModerateComments
             if (!wp_update_comment($comment_arr)) {
                 die($this->strings['replace_failed']);
             }
+
+            // We set the meta value to -1, and by that it wont be able to be reported again.
+            // Once deemed ok -> always ok.
+            # todo: add this as an option (being able to report the comment again or not)
+            update_comment_meta($id, $this->pluginPrefix . '_reported', -1);
 
             wp_redirect($_SERVER['HTTP_REFERER']);
         }
