@@ -3,7 +3,7 @@ Contributors:  MarcDK, lefalque
 Tags: comments, admin, ajax, flag, report, moderate, trash, replace
 Requires at least: 3.0
 Tested up to: 6.0
-Stable tag: 1.9
+Stable tag: 2.0
 License: GPL2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
