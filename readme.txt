@@ -37,54 +37,21 @@ text which can be set in the settings.
 
 == Changelog ==
 
+= 2.0 =
+* Fixed compatibility with WordPress 6.0.
+
 = 1.9 =
-Migration to GitHub actions.
+* Migration to GitHub actions.
 
 = 1.2.4 =
 
 * Replaced comments in the backend are not marked as ok automatically. This saves clicks for moderators.
-
-= 1.2.3 =
-
-* Fixed anchor tag missing href.
 
 = 1.2.2 =
 
 * Links will no longer show up if Javascript is disabled.
 * New HTML structure for the links.
 * Small localisation changes.
-
-= 1.2 =
-
-* This is a feature merge of the plugin "ReportComments" by lefalque and "Ajax Trash and Replace
-Comments" by myself. I added a german translation and fixed php notices.
-
-= 1.1.3 =
-
-Fixed empty moderation text on plugin activation.
-
-= 1.1.2 =
-
-Fixed renaming bug. Seems I am not allowed to rename the plugin file. I forgot to remove the old files.
-
-= 1.1.0 =
-
-* Fixed bug that did not show any comments for users who were not logged in.
-* New feature: replace comment text with your custom moderation text.
-* Link to new settings page in the frontend.
-* Renamed plugin.
-
-= 1.0.3 =
-
-* Added screenshot.
-
-= 1.0.2 =
-
-* Added ajax activity indicators.
-
-= 1.0.1 =
-
-* Fixed: Trash button was visible in the backend.
 
 == Screenshots ==
 
