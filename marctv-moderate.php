@@ -6,7 +6,6 @@ Description: Grants visitors the ability to report inappropriate comments and ad
 Version:  2.0
 Contributors: MarcDK
 Author URI: marc.tv
-Text Domain: marctv-moderate
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 */
 
@@ -22,7 +21,7 @@ class MarcTVModerateComments
     {
         $this->pluginUrl = plugins_url(false, __FILE__);
 
-        load_plugin_textdomain('marctv-moderate', false, dirname(plugin_basename(__FILE__)) . '/language/');
+        load_plugin_textdomain('marctv-ajax-trash-comments', false, dirname(plugin_basename(__FILE__)) . '/language/');
 
         $this->strings = $this->getStrings();
 
@@ -43,10 +42,10 @@ class MarcTVModerateComments
         /* if comment moderation text is not set get the localized string. */
         if (!get_option('marctv-moderation-text')) {
             /* Loading the textdomain. I could not figure out to prevent this here. */
-            load_plugin_textdomain('marctv-moderate', false, dirname(plugin_basename(__FILE__)) . '/languages/');
+            load_plugin_textdomain('marctv-ajax-trash-comments', false, dirname(plugin_basename(__FILE__)) . '/languages/');
 
             /* If the moderation text is empty fill it with the default text */
-            update_option('marctv-moderation-text', __('[incorrect topic]', 'marctv-moderate'));
+            update_option('marctv-moderation-text', __('[incorrect topic]', 'marctv-ajax-trash-comments'));
         }
     }
 
@@ -153,47 +152,47 @@ class MarcTVModerateComments
     {
         $strings = array(
             // Title for link in the menu.
-            'menu_title' => __('Reported', 'marctv-moderate'),
+            'menu_title' => __('Reported', 'marctv-ajax-trash-comments'),
             // Title for the reported comments page.
-            'page_title' => __('Reported comments', 'marctv-moderate'),
+            'page_title' => __('Reported comments', 'marctv-ajax-trash-comments'),
             // Confirm dialog on front end for replace.
-            'confirm_replace' => __('Are you sure you want to replace this comment? This action can not be undone!', 'marctv-moderate'),
+            'confirm_replace' => __('Are you sure you want to replace this comment? This action can not be undone!', 'marctv-ajax-trash-comments'),
             // Confirm dialog on front end for reporting.
-            'confirm_report' => __('Are you sure you want to report this comment?', 'marctv-moderate'),
+            'confirm_report' => __('Are you sure you want to report this comment?', 'marctv-ajax-trash-comments'),
             // Message to show user after successfully reporting a comment.
-            'report_success' => __('The comment has been reported', 'marctv-moderate'),
+            'report_success' => __('The comment has been reported', 'marctv-ajax-trash-comments'),
             // Message to show user after reporting a comment has failed.
-            'report_failed' => __('The comment has been reported', 'marctv-moderate'),
+            'report_failed' => __('The comment has been reported', 'marctv-ajax-trash-comments'),
             // Message to show user after successfully replacing a comment.
-            'replace_success' => __('The comment text has been replaced', 'marctv-moderate'),
+            'replace_success' => __('The comment text has been replaced', 'marctv-ajax-trash-comments'),
             // Message to show user after replacing a comment has failed.
-            'replace_failed' => __('The comment has already been replaced', 'marctv-moderate'),
+            'replace_failed' => __('The comment has already been replaced', 'marctv-ajax-trash-comments'),
             // Text for the report link shown below each comment.
-            'report' => __('Report', 'marctv-moderate'),
+            'report' => __('Report', 'marctv-ajax-trash-comments'),
             // Text for the trash link shown below each comment.
-            'trash' => __('Trash', 'marctv-moderate'),
+            'trash' => __('Trash', 'marctv-ajax-trash-comments'),
             // Text for the replace link shown below each comment.
-            'untrash' => __('Untrash', 'marctv-moderate'),
+            'untrash' => __('Untrash', 'marctv-ajax-trash-comments'),
             // Text for the replace link shown below each comment.
-            'replace' => __('Replace', 'marctv-moderate'),
+            'replace' => __('Replace', 'marctv-ajax-trash-comments'),
             // Text in admin for link that deems the comment OK.
-            'ignore_report' => __('Comment is ok', 'marctv-moderate'),
+            'ignore_report' => __('Comment is ok', 'marctv-ajax-trash-comments'),
             // Action of moving a comment in the trash.
-            'trashing' => __('trashing', 'marctv-moderate'),
+            'trashing' => __('trashing', 'marctv-ajax-trash-comments'),
             // Action of moving a comment out of the trash.
-            'untrashing' => __('untrashing', 'marctv-moderate'),
+            'untrashing' => __('untrashing', 'marctv-ajax-trash-comments'),
             // Error message
-            'error' => __('an error occurred.', 'marctv-moderate'),
+            'error' => __('an error occurred.', 'marctv-ajax-trash-comments'),
             // Action while replacing a comment.
-            'replacing' => __('replacing', 'marctv-moderate'),
+            'replacing' => __('replacing', 'marctv-ajax-trash-comments'),
             // Action while reporting a comment.
-            'reporting' => __('reporting', 'marctv-moderate'),
+            'reporting' => __('reporting', 'marctv-ajax-trash-comments'),
             // Error message shown when a comment can't be found.
-            'invalid_comment' => __('The comment does not exist', 'marctv-moderate'),
+            'invalid_comment' => __('The comment does not exist', 'marctv-ajax-trash-comments'),
             // Header for settings field.
-            'settings_header' => __('Report Comments Settings', 'marctv-moderate'),
+            'settings_header' => __('Report Comments Settings', 'marctv-ajax-trash-comments'),
             // Description for members only setting.
-            'settings_members_only' => __('Only logged in users may report comments', 'marctv-moderate')
+            'settings_members_only' => __('Only logged in users may report comments', 'marctv-ajax-trash-comments')
         );
 
         return apply_filters('report_comments_strings', $strings);
@@ -205,7 +204,7 @@ class MarcTVModerateComments
     public function commentsPage()
     {
         if (!current_user_can('moderate_comments')) {
-            die(__('Cheatin&#8217; uh?'));
+            die(__('security check failure','marctv-ajax-trash-comments'));
         }
 
         global $wpdb;
@@ -262,11 +261,11 @@ class MarcTVModerateComments
     {
         $id = (int)$_POST['id'];
         if (!wp_verify_nonce($_POST['_ajax_nonce'], "report-comment-" . $id) || $id != $_POST['id'] || !check_ajax_referer("report-comment-" . $id)) {
-            die(__('Cheatin&#8217; uh?'));
+            die(__('security check failure','marctv-ajax-trash-comments'));
         }
 
         if (get_option($this->pluginPrefix . '_members_only') && !is_user_logged_in()) {
-            die(__('Cheatin&#8217; uh?'));
+            die(__('security check failure','marctv-ajax-trash-comments'));
         }
 
         if (!$this->flag($id)) {
@@ -285,11 +284,11 @@ class MarcTVModerateComments
     {
         $id = (int)$_POST['id'];
         if (!wp_verify_nonce($_POST['_ajax_nonce'], "replace-comment-" . $id) || $id != $_POST['id'] || !check_ajax_referer("replace-comment-" . $id)) {
-            die(__('Cheatin&#8217; uh?'));
+            die(__('security check failure','marctv-ajax-trash-comments'));
         }
 
         if (get_option($this->pluginPrefix . '_members_only') && !is_user_logged_in()) {
-            die(__('Cheatin&#8217; uh?'));
+            die(__('security check failure','marctv-ajax-trash-comments'));
         }
 
         /* Replace comment with moderation text */
@@ -314,11 +313,11 @@ class MarcTVModerateComments
         $comment_status = wp_get_comment_status($id);
 
         if (!wp_verify_nonce($_POST['_ajax_nonce'], "trash-comment-" . $id) || $id != $_POST['id'] || !check_ajax_referer("trash-comment-" . $id)) {
-            die(__('Cheatin&#8217; uh?'));
+            die(__('security check failure','marctv-ajax-trash-comments'));
         }
 
         if (get_option($this->pluginPrefix . '_members_only') && !is_user_logged_in()) {
-            die(__('Cheatin&#8217; uh?'));
+            die(__('security check failure','marctv-ajax-trash-comments'));
         }
 
 
@@ -419,7 +418,7 @@ class MarcTVModerateComments
     {
         if (isset($_GET['c']) && isset($_GET['_wpnonce'])) {
             if (!wp_verify_nonce($_GET['_wpnonce'], 'ignore-report_' . $_GET['c']) || !current_user_can('moderate_comments')) {
-                die(__('Cheatin&#8217; uh?'));
+                die(__('security check failure','marctv-ajax-trash-comments'));
             }
             $id = absint($_GET['c']);
             if (!get_comment($id)) {
@@ -441,7 +440,7 @@ class MarcTVModerateComments
     {
         if (isset($_GET['c']) && isset($_GET['_wpnonce'])) {
             if (!wp_verify_nonce($_GET['_wpnonce'], 'replace-comment-' . $_GET['c']) || !current_user_can('moderate_comments')) {
-                die(__('Cheatin&#8217; uh?'));
+                die(__('security check failure','marctv-ajax-trash-comments'));
             }
             $id = absint($_GET['c']);
             if (!get_comment($id)) {

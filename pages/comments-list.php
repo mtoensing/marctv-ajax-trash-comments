@@ -1,6 +1,6 @@
 <?php 
 	if (!defined('ABSPATH')) {
-		die(__('Cheatin&#8217; uh?'));
+		die(__('security check failure','marctv-ajax-trash-comments'));
 	}
 
 ?>
@@ -33,9 +33,9 @@
 				</td>
 				<td class="comment column-comment">
 					<div class="submitted-on">
-						<?php printf(__('Submitted on <a href="%1$s">%2$s at %3$s</a>'), 
+						<?php printf(__('Submitted on <a href="%1$s">%2$s at %3$s</a>','marctv-ajax-trash-comments'), 
 							$post_link. '#comment-' .$comment->comment_id,
-							get_comment_date(__( 'Y/m/d' ), $comment->comment_id),
+							get_comment_date(__( 'Y/m/d', 'marctv-ajax-trash-comments'), $comment->comment_id),
 							get_comment_date(get_option('time_format'), $comment->comment_id));
 						?>
 					</div>
