@@ -69,7 +69,7 @@ class MarcTVModerateComments
      */
     public function frontendInit()
     {
-        add_filter('comment_text', array($this, 'printModerateLinks'));
+        add_filter('comment_text', array($this, 'printModerateLinks'), 10, 3 );
 
         add_action('wp_ajax_' . $this->pluginPrefix . '_trash', array($this, 'trashComment'));
         add_action('wp_ajax_' . $this->pluginPrefix . '_replace', array($this, 'replaceComment'));
@@ -341,9 +341,9 @@ class MarcTVModerateComments
      * Constructs "report this comment" link.
      * @return string
      */
-    private function getReportLink()
+    private function getReportLink($comment)
     {
-        $id = get_comment_ID();
+        $id = $comment->comment_ID;
         $class = $this->pluginPrefix . "-report";
         $nonce = wp_create_nonce("report-comment-" . $id);
 
@@ -360,9 +360,9 @@ class MarcTVModerateComments
      * Constructs "trash this comment" link.
      * @return string
      */
-    private function getTrashLink()
+    private function getTrashLink($comment)
     {
-        $id = get_comment_ID();
+        $id = $comment->comment_ID;
         $class = $this->pluginPrefix . "-trash";
         $nonce = wp_create_nonce("trash-comment-" . $id);
         $link = sprintf('<a href="javascript:void(0)" data-nonce="%s" data-cid="%s" class="%s">%s</a>',
@@ -378,9 +378,9 @@ class MarcTVModerateComments
      * Constructs "replace this comment" link.
      * @return string
      */
-    private function getReplaceLink()
+    private function getReplaceLink($comment)
     {
-        $id = get_comment_ID();
+        $id = $comment->comment_ID;
         $class = $this->pluginPrefix . "-replace";
         $nonce = wp_create_nonce("replace-comment-" . $id);
         $link = sprintf('<a href="javascript:void(0)" data-nonce="%s" data-cid="%s" class="%s">%s</a>',
@@ -396,14 +396,14 @@ class MarcTVModerateComments
     /**
      * Appends a "report this comment" link after the "reply" link below a comment.
      */
-    public function printModerateLinks($comment_reply_link)
+    public function printModerateLinks($comment_reply_link, $comment )
     {
         if (is_single()) {
             if (current_user_can('moderate_comments')) {
-                return $comment_reply_link . '<p class="marctv-moderate-links">' . $this->getReportLink() . ' | ' . $this->getTrashLink() . ' | ' . $this->getReplaceLink() . '</p>';
+                return $comment_reply_link . '<p class="marctv-moderate-links">' . $this->getReportLink($comment) . ' | ' . $this->getTrashLink($comment) . ' | ' . $this->getReplaceLink($comment) . '</p>';
             } else {
                 if (!get_option($this->pluginPrefix . '_members_only')) {
-                    return $comment_reply_link . '<p class="marctv-moderate-links">' . $this->getReportLink() . '</p>';
+                    return $comment_reply_link . '<p class="marctv-moderate-links">' . $this->getReportLink($comment) . '</p>';
                 }
             }
         }
