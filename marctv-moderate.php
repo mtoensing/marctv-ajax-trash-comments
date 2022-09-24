@@ -3,7 +3,7 @@
 Plugin Name: MarcTV Moderate Comments
 Plugin URI: http://marctv.de/blog/marctv-wordpress-plugins/
 Description: Grants visitors the ability to report inappropriate comments and admins to replace and trash them in the frontend.
-Version:  2.0
+Version:  2.1
 Contributors: MarcDK
 Author URI: marc.tv
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
